@@ -33,7 +33,7 @@ public class Omi {
             return this.petOmi();
         }
         else if (name.equals("Launch")){
-            return new OmiResponse("Hello, I am Omi! I am your virtual pet! It is nice to meet you!");
+            return new OmiResponse("Hello, I am Omi! I am your virtual pet! It is nice to meet you! You can interact with me by playing with me, petting me, or feeding me. You can also check on how I'm doing! What would you like to do?");
         }
         else if (name.equals("FeedOmiIntent")){
             return this.feedOmi(intent);
@@ -43,6 +43,27 @@ public class Omi {
         }
         else if (name.equals("PlayWithOmiIntent")){
             return this.playGuessingGame(intent);
+        }
+        else if (name.equals("CheckOmiStatusIntent")){
+            return this.checkOmiStatus();
+        }
+        else if (name.equals("CheckOmiAgeIntent")){
+            return this.checkOmiAge();
+        }
+        else if (name.equals("CheckOmiFullIntent")){
+            return this.checkOmiFullness();
+        }
+        else if (name.equals("CheckOmiHappyIntent")){
+            return this.checkOmiHappiness();
+        }
+        else if (name.equals("CheckOmiHealthIntent")){
+            return this.checkOmiHealth();
+        }
+        else if (name.equals("GiveMedicineIntent")){
+            return this.giveMedicine();
+        }
+        else if (name.equals("ClarifyIntent")){
+            return this.clarifyOptions();
         }
 
         return new OmiResponse("Unknown.");
@@ -64,6 +85,30 @@ public class Omi {
         return happiness;
     }
 
+    String getStringHappiness(){
+        if (happiness == 0){
+            return "Omi doesn't seem very happy.";
+        }
+        else if (happiness == 1){
+            return "Omi is a little bit happy.";
+        }
+        else if (happiness == 2){
+            return "Omi is pretty happy.";
+        }
+        else if (happiness == 3){
+            return "Omi is happy!";
+        }
+        else if (happiness == 4){
+            return "Omi is so happy!";
+        }
+        else if (happiness >= 5){
+            return "This is the happiest Omi has ever been!";
+        }
+        else {
+            return "Omi isn't sure.";
+        }
+    }
+
     void setFullness(int f){
         fullness = f;
     }
@@ -72,8 +117,41 @@ public class Omi {
         return fullness;
     }
 
+    String getStringFullness(){
+        if (fullness == 0){
+            return "Omi is starving!";
+        }
+        else if (fullness == 1){
+            return "Omi is still pretty hungry.";
+        }
+        else if (fullness == 2){
+            return "Omi is a little bit hungry.";
+        }
+        else if (fullness == 3){
+            return "Omi is feeling full!";
+        }
+        else if (fullness == 4){
+            return "Omi is really full!";
+        }
+        else if (fullness == 5){
+            return "Omi is so full, she feels like she's going to pop!";
+        }
+        else {
+            return "Omi isn't sure.";
+        }
+    }
+
     boolean isHealthy(){
         return healthy;
+    }
+
+    String healthyString(){
+        if (healthy){
+            return "Omi is healthy!";
+        }
+        else {
+            return "Omi isn't feeling very well.";
+        }
     }
 
     void checkandsetHealthy(){
@@ -99,13 +177,22 @@ public class Omi {
         String unit;
         age = System.nanoTime() - startLife;
         age = TimeUnit.MINUTES.convert(age, TimeUnit.NANOSECONDS);
-        unit = "minutes old.";
+        if (age == 1) {
+            unit = " minute old.";
+        }
+        else unit = " minutes old.";
         if (age > 59){
             age = TimeUnit.HOURS.convert(age, TimeUnit.MINUTES);
-            unit = "hours old.";
+            if (age == 1){
+                unit = " hour old.";
+            }
+            else unit = " hours old.";
             if (age > 23){
                 age = TimeUnit.DAYS.convert(age, TimeUnit.HOURS);
-                unit = "days old.";
+                if (age == 1){
+                    unit = " day old.";
+                }
+                else unit = " days old.";
             }
         }
         return "Omi is " + age + unit;
@@ -118,23 +205,23 @@ public class Omi {
     }
 
     private OmiResponse playGuessingGame(OmiIntent intent){
-        //if Omi isn't playing, response text
-        String number = intent.getSlot("number");
-        if (number == null){
-            return new OmiResponse("Omi is thinking of a number between 1 and 10. Can you guess which one?");
-        }
-        else if (number.equals(Integer.toString(game.omiGuess))){
-            playing = false;
-            return new OmiResponse("Yay! That's my number!");
-        }
-        else if (Integer.parseInt(number) > game.omiGuess){
-            return new OmiResponse("Nope, that's too high! Try again!");
-        }
-        else if (Integer.parseInt(number) < game.omiGuess){
-            return new OmiResponse("Nope, that's too low! Try again!");
+        if (!playing){
+            return new OmiResponse("Hmm, doesn't look like you've started a game yet! Say 'play with Omi' to start playing!");
         }
         else {
-            return new OmiResponse("You have to guess a number between 1 and 10!");
+            String number = intent.getSlot("number");
+            if (number == null) {
+                return new OmiResponse("Omi is thinking of a number between 1 and 10. Can you guess which one?");
+            } else if (number.equals(Integer.toString(game.omiGuess))) {
+                playing = false;
+                return new OmiResponse("Yay! That's my number!");
+            } else if (Integer.parseInt(number) > game.omiGuess) {
+                return new OmiResponse("Nope, that's too high! Try again!");
+            } else if (Integer.parseInt(number) < game.omiGuess) {
+                return new OmiResponse("Nope, that's too low! Try again!");
+            } else {
+                return new OmiResponse("You have to guess a number between 1 and 10!");
+            }
         }
     }
 
@@ -166,6 +253,10 @@ public class Omi {
 
     private OmiResponse feedOmiMeal(){
         fullness++;
+        if (fullness > 5){
+            healthy = false;
+            return new OmiResponse("Uh oh, that's a lot of food. I don't feel that well...");
+        }
         return new OmiResponse("Mmm, that was very filling!");
 
     }
@@ -173,6 +264,11 @@ public class Omi {
     private OmiResponse feedOmiSnack(){
         happiness++;
         snackCounter++;
+        if (snackCounter >= 5){
+            healthy = false;
+            happiness--;
+            return new OmiResponse("Uh oh, that was a lot of treats. I don't feel very well...");
+        }
         return new OmiResponse("Those are my favorite treats! Yay!");
     }
 
@@ -193,8 +289,48 @@ public class Omi {
     }
 
     public String toString(){
+        return "So let's see how Omi is doing!\n" + this.healthyString() + " " + this.getStringFullness() + " " + this.getStringHappiness() + " " + this.getAge();
 
+    }
 
+    private OmiResponse checkOmiStatus(){
+        return new OmiResponse(this.toString());
+    }
+
+    private OmiResponse checkOmiAge(){
+        return new OmiResponse(this.getAge());
+    }
+
+    private OmiResponse checkOmiFullness(){
+        return new OmiResponse(this.getStringFullness());
+    }
+
+    private OmiResponse checkOmiHappiness(){
+        return new OmiResponse(this.getStringHappiness());
+    }
+
+    private OmiResponse checkOmiHealth(){
+        return new OmiResponse(this.healthyString());
+    }
+
+    private OmiResponse giveMedicine(){
+        if (!healthy){
+            healthy = true;
+            if (snackCounter >= 5){
+                snackCounter = 0;
+            }
+            if (fullness > 5){
+                fullness = 1;
+            }
+            return new OmiResponse("Omi is feeling a lot better now! Thanks!");
+        }
+        else {
+            return new OmiResponse("Omi doesn't need any medicine right now.");
+        }
+    }
+
+    private OmiResponse clarifyOptions(){
+        return new OmiResponse("You can play a game with Omi, pet Omi, feed Omi, or check on how Omi is doing!");
     }
 
 
